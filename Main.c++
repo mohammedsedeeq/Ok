@@ -3,86 +3,81 @@
 #include <algorithm>
 #include <random>
 
-int main() {
-    // Define colors and numbers
-    std::vector<std::string> colors = {"red", "green", "blue", "yellow"};
-    std::vector<int> numbers;
-    for (int i = 1; i <= 13; i++) {
-        numbers.push_back(i);
-    }
-
-    // Initialize an empty vector to hold the cards
-    std::vector<std::pair<std::string, int>> cards;
-
-    // Generate cards with two of each color and number combination
-    for (const auto& color : colors) {
-        for (const auto& number : numbers) {
-            cards.push_back(std::make_pair(color, number));
-            cards.push_back(std::make_pair(color, number));
+class Player {
+public:
+    std::vector<std::pair<std::string, int>> board;
+    Player(int numCards) : board(28, {"", -1}) {
+        for (int i = 0; i < numCards; ++i) {
+            board[i] = {"", 0};
         }
     }
+    
+    void placeCard(int position, std::pair<std::string, int> card) {
+        if (position >= 0 && position < 28) {
+            board[position] = card;
+        }
+    }
+    
+    void moveCard(int from, int to) {
+        if (from >= 0 && from < 28 && to >= 0 && to < 28) {
+            std::swap(board[from], board[to]);
+        }
+    }
+    
+    void displayBoard() {
+        std::cout << "Board: \n";
+        for (size_t i = 0; i < board.size(); ++i) {
+            if (board[i].first != "") {
+                std::cout << i + 1 << ") " << board[i].first << " - " << board[i].second << "\n";
+            } else {
+                std::cout << i + 1 << ") [Empty] \n";
+            }
+        }
+    }
+};
 
-    // Add two Joker cards without any color or number
-    cards.push_back(std::make_pair("Joker", 0));
-    cards.push_back(std::make_pair("Joker", 0));
+int main() {
+    std::vector<std::string> colors = {"red", "green", "blue", "yellow"};
+    std::vector<int> numbers;
+    for (int i = 1; i <= 13; i++) numbers.push_back(i);
 
-    // Shuffle the cards to get a random arrangement
+    std::vector<std::pair<std::string, int>> cards;
+    for (const auto& color : colors) {
+        for (int num : numbers) {
+            cards.push_back({color, num});
+            cards.push_back({color, num});
+        }
+    }
+    cards.push_back({"Joker", 0});
+    cards.push_back({"Joker", 0});
+
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(cards.begin(), cards.end(), g);
 
-    // Display all randomized cards
-    std::cout << "Randomized Cards:" << std::endl;
-    int i = 0;
-    for (const auto& card : cards) {
-        std::cout << ++i << ")";
-        
-            std::cout << card.first << " - " << card.second << std::endl;
-        
+    std::vector<Player> players;
+    players.emplace_back(15); // First player gets 15 cards
+    for (int i = 1; i < 4; ++i) {
+        players.emplace_back(14); // Other players get 14 cards
     }
-    std::cout << std::endl;
 
-    // Define players
-    std::vector<std::vector<std::pair<std::string, int>>> players(4);
-
-    // Distribute cards to players in the specified sequence
     int currentIndex = 0;
-    int playerIndex = 0;
-    std::vector<int> sequence = {3, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
-    for (int count : sequence) {
-        for (int j = 0; j < count; ++j) {
-            players[playerIndex].push_back(cards[currentIndex]);
-            ++currentIndex;
-            if (currentIndex >= cards.size()) {
-                break;
+    for (size_t i = 0; i < players.size(); ++i) {
+        for (size_t j = 0; j < (i == 0 ? 15 : 14); ++j) {
+            if (currentIndex < cards.size()) {
+                players[i].placeCard(j, cards[currentIndex++]);
             }
         }
-        playerIndex = (playerIndex + 1) % 4;
     }
 
-    // Display each player's cards
-    for (size_t j = 0; j < players.size(); ++j) {
-        std::cout << "Player " << (j + 1) << " Cards:" << std::endl;
-        int a=1;
-        for (const auto& card : players[j]) {
-            if (card.first == "Joker") {
-                std::cout <<a++<< ")Joker" << std::endl;
-            } else {
-                std::cout <<a++<<")"<< card.first << " - " << card.second << std::endl;
-            }
-        }
-        std::cout << std::endl;
+    for (size_t i = 0; i < players.size(); ++i) {
+        std::cout << "Player " << i + 1 << "\n";
+        players[i].displayBoard();
     }
-
-    // Display the remaining cards
-    std::cout << "Remaining Cards:" << std::endl;
-    for (size_t j = currentIndex; j < cards.size(); ++j) {
-        if (cards[j].first == "Joker") {
-            std::cout << j<<")"<< "Joker" << std::endl;
-        } else {
-            std::cout << j<<")"<<cards[j].first << " - " << cards[j].second << std::endl;
-        }
+    
+    std::cout << "Remaining Cards:\n";
+    for (size_t i = currentIndex; i < cards.size(); ++i) {
+        std::cout << cards[i].first << " - " << cards[i].second << "\n";
     }
-
     return 0;
 }
