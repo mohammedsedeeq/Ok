@@ -48,7 +48,7 @@ int main() {
     // Distribute cards to players in the specified sequence
     int currentIndex = 0;
     int playerIndex = 0;
-    std::vector<int> sequence = {3, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
+    std::vector<int> sequence = {3, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
     for (int count : sequence) {
         for (int j = 0; j < count; ++j) {
             players[playerIndex].push_back(cards[currentIndex]);
